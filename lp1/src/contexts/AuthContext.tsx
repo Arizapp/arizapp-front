@@ -146,6 +146,7 @@ export function AuthContextProvider(props: AuthContextProviderProps) {
                             password: '',
                             hostname: (data?.data?.host || 'unknowserver.arizapp.com.br'),
                             address: (data?.data?.endereco || ''),
+                            description:(data?.data?.descricao || ''),
                             location: { lat: parseInt((data?.data?.lat_lng && data?.data?.lat_lng[0] || '0')), lng: parseInt((data?.data?.lat_lng && data?.data?.lat_lng[1] || '0')) }
                         }
                         resolve({
