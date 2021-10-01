@@ -35,7 +35,7 @@ export const AuthContext = createContext({} as AuthUserTypeContext);
 export type AuthContextProviderProps = {
     children?: ReactNode
 };
-//TESTE
+//TESTE 2
 export type signResponseType = {
     success?: boolean;
     error?:any;
