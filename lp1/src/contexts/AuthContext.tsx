@@ -36,6 +36,27 @@ export type AuthContextProviderProps = {
     children?: ReactNode
 };
 
+export type signResponseType = {
+    success?: boolean;
+    msg?: string;
+    code?: number;
+    auth_token?: string;
+    data?: {
+        auth_at?: number;
+        id?: number;
+        logo?: string;
+        titulo?: string;
+        descricao?: string;
+        endereco?: string;
+        lat_lng?: string[];
+        username?: string;
+        chave_privada_de_acesso?: string;
+    };
+    response_time?: number;
+    expirate_time?: number;
+    redirect_url?: string;
+}
+
 export function AuthContextProvider(props: AuthContextProviderProps) {
     const [user, setUser] = useState<userType>();
     async function authUser() {
@@ -115,7 +136,7 @@ export function AuthContextProvider(props: AuthContextProviderProps) {
                     with_credentials: true,
                     headers: { "Authorization": "Credentials " + hostname + ":" + username + "@" + password, },
                     data: { remember_me: true },
-                    success: function (data) {
+                    success: function (data: signResponseType) {
                         clearTimeout(singInPromiseTimeOut);
                         var userData: userType = {
                             user_id: (data?.clientes_host_id || 0),
