@@ -145,7 +145,7 @@ export function AuthContextProvider(props: AuthContextProviderProps) {
                             password: '',
                             hostname: '',
                             address: (data?.data?.endereco || ''),
-                            location: { lat: parseInt((data?.data?.lat_lng[0] || '0')), lng: parseInt((data?.data?.lat_lng[1] || '0')) }
+                            location: { lat: parseInt((data?.data?.lat_lng && data?.data?.lat_lng[0] || '0')), lng: parseInt((data?.data?.lat_lng && data?.data?.lat_lng[1] || '0')) }
                         }
                         resolve({
                             success: true,
