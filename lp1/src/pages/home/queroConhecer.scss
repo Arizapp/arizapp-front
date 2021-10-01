@@ -1,0 +1,33 @@
+div.queroConhecer-content {
+    display: flex;
+    justify-self: center;
+    align-items: center;
+    flex-direction: column;
+    gap: 25px;
+    padding: 0 25px 0 15px;
+    h1 {
+        font-size: 25px;
+    }
+}
+main > aside {
+    &:hover div.queroConhecer-content {
+        flex-direction: row;
+        h1 {
+            font-size: 45px;
+        }
+        iframe {
+            width: 280px;
+            height: 673px;
+        }
+    }
+    div.queroConhecer-content {
+        iframe {
+            width: 280px;
+            height: 544px;
+            max-width: 90%;
+            max-height: 90%;
+            border-radius: 10px;
+            box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.1);
+        }
+    }
+}
