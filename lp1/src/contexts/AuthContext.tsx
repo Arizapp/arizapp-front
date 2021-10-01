@@ -38,6 +38,7 @@ export type AuthContextProviderProps = {
 
 export type signResponseType = {
     success?: boolean;
+    error?:any;
     msg?: string;
     code?: number;
     auth_token?: string;
