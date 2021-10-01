@@ -45,6 +45,7 @@ export type signResponseType = {
     data?: {
         auth_at?: number;
         id?: number;
+        host?: string;
         logo?: string;
         titulo?: string;
         descricao?: string;
@@ -143,7 +144,7 @@ export function AuthContextProvider(props: AuthContextProviderProps) {
                             user_id: (data?.data?.id || 0),
                             username: (data?.data?.username || ''),
                             password: '',
-                            hostname: '',
+                            hostname: (data?.data?.host || 'unknowserver.arizapp.com.br'),
                             address: (data?.data?.endereco || ''),
                             location: { lat: parseInt((data?.data?.lat_lng && data?.data?.lat_lng[0] || '0')), lng: parseInt((data?.data?.lat_lng && data?.data?.lat_lng[1] || '0')) }
                         }
