@@ -38,7 +38,7 @@ export type AuthContextProviderProps = {
 //TESTE 2
 export type signResponseType = {
     success?: boolean;
-    error?:any;
+    error?: any;
     msg?: string;
     code?: number;
     auth_token?: string;
@@ -140,12 +140,12 @@ export function AuthContextProvider(props: AuthContextProviderProps) {
                     success: function (data: signResponseType) {
                         clearTimeout(singInPromiseTimeOut);
                         var userData: userType = {
-                            user_id: (data?.clientes_host_id || 0),
-                            username: (data?.clientes_host_id || ''),
-                            password: (data?.clientes_host_id || ''),
-                            hostname: (data?.clientes_host_id || ''),
-                            address: (data?.clientes_host_id || ''),
-                            location: { lat: (data?.clientes_host_id || 0), lng: (data?.clientes_host_id || 0) }
+                            user_id: (data?.data?.id || 0),
+                            username: (data?.data?.username || ''),
+                            password: '',
+                            hostname: '',
+                            address: (data?.data?.endereco || ''),
+                            location: { lat: (data?.data?.lat_lng[0] || 0), lng: (data?.data?.lat_lng[1] || 0) }
                         }
                         resolve({
                             success: true,
