@@ -126,7 +126,7 @@ export function AuthContextProvider(props: AuthContextProviderProps) {
     async function singIn(data: singInFunctionProps) {
 
         async function doAjaxSignIn(username: string, password: string, hostname: string, successCallBack: (data: any) => void, errorCallBack: (data: any) => void) {
-            var singInPromise = new Promise<singInFunctionReturnType>((resolve) => {
+            return new Promise<singInFunctionReturnType>((resolve) => {
                 var singInPromiseTimeOut = setTimeout(() => {
                     resolve({
                         success: false,

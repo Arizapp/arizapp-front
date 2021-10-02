@@ -36,6 +36,7 @@ export function CadastroPage() {
     var authContexted = useAuth();
 
     let userHistory = useHistory();
+    
     const [asideContent, setAsideContentState] = useState('default');
     const setAsideContentOnClick = function (content: string) {
         setAsideContentState(content);
