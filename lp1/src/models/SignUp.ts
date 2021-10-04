@@ -26,7 +26,7 @@ export async function signUp(accountData: createAccountProps) {
             throw new Error('Errro ao tentar validar erros internos da criação de conta.');
         }
 
-    } catch (e) {
+    } catch (e:ErrorEvent) {
         return { success: false, msg: e.message };
     }
 }

@@ -1,4 +1,25 @@
-
+export type signResponseType = {
+    success?: boolean;
+    error?: any;
+    msg?: string;
+    code?: number;
+    auth_token?: string;
+    data?: {
+        auth_at?: number;
+        id?: number;
+        host?: string;
+        logo?: string;
+        titulo?: string;
+        descricao?: string;
+        endereco?: string;
+        lat_lng?: string[];
+        username?: string;
+        chave_privada_de_acesso?: string;
+    };
+    response_time?: number;
+    expirate_time?: number;
+    redirect_url?: string;
+}
 export type userType = {
     user_id: number;
     username?: string;
@@ -14,8 +35,14 @@ export type singInFunctionReturnType = {
     msg?: string;
     user?: userType;
 };
+export type signInProps = {
+    hostname:string;
+    username:string;
+    password:string;
+};
 
-export async function SignIn() {
+export async function SignIn(signInData:signInProps) {
+    var {hostname, username, password} = signInData;
     return new Promise<singInFunctionReturnType>((resolve) => {
         var singInPromiseTimeOut = setTimeout(() => {
             resolve({
@@ -46,7 +73,6 @@ export async function SignIn() {
                     user: userData
                 });
                 console.log('Login response: ', data);
-                successCallBack(data);
             },
             error: function (response) {
                 clearTimeout(singInPromiseTimeOut);
@@ -57,7 +83,6 @@ export async function SignIn() {
                     msg: 'Algum erro aconteceu',
                     user: data
                 });
-                errorCallBack(data);
             }
         });
     });
