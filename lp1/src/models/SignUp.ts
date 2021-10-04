@@ -1,35 +1,4 @@
-
-export async function signUp(accountData: createAccountProps) {
-    var response: createAccountResponseType = { success: false, msg: '' };
-    try {
-        //Create account
-        try {
-            response = await createAccount(accountData);
-        } catch (e) {
-            throw new Error('Errro ao tentar criar conta.');
-        }
-        //V
-        if (!response?.success) {
-            try {
-                var errorsMessages = signUpHandleError(response);
-                response.msg = errorsMessages.join(' and ');
-                return response;
-            } catch (e) {
-                throw new Error('Errro ao tentar formatar os erros internos da criação de conta.');
-            }
-        }
-        try {
-            var errorsMessages = signUpHandleError(response);
-            response.msg = errorsMessages.join(' and ');
-            return response;
-        } catch (e) {
-            throw new Error('Errro ao tentar validar erros internos da criação de conta.');
-        }
-
-    } catch (e:ErrorEvent) {
-        return { success: false, msg: e.message };
-    }
-}
+import { SignIn, singInFunctionReturnType, userType } from './SignIn';
 
 export type createAccountProps = {
     hostname: string;
@@ -69,6 +38,46 @@ export type createAccountResponseType = {
     }
 };
 
+export type singUpFunctionReturnType = {
+    success?: boolean,
+    msg?: string,
+    error?: any,
+    user?: userType | undefined;
+};
+
+export async function signUp(accountData: createAccountProps): Promise<singUpFunctionReturnType> {
+    var response: singUpFunctionReturnType = { success: false, msg: 'unknown error yet.', error: undefined, user: undefined };
+    var createAccountResponse: createAccountResponseType = { success: false, msg: '' };
+    try {
+        //Create account
+        try {
+            createAccountResponse = await createAccount(accountData);
+        } catch (e) {
+            throw new Error('Errro ao tentar criar conta.');
+        }
+        //V
+        if (!createAccountResponse?.success) {
+            try {
+                var errorsMessages = signUpHandleError(createAccountResponse);
+                response.msg = errorsMessages.join(' and ');
+                return response;
+            } catch (e) {
+                throw new Error('Errro ao tentar formatar os erros internos da criação de conta.');
+            }
+        }
+        try {
+            var signInResult = await signInUpHandleSuccess(createAccountResponse);
+            return signInResult;
+        } catch (e) {
+            throw new Error('Errro ao tentar validar erros internos da criação de conta.');
+        }
+
+    } catch (e: any) {
+        return { success: false, msg: e.message };
+    }
+}
+
+
 async function createAccount(accountData: createAccountProps): Promise<createAccountResponseType> {
     return new Promise((resolve, reject) => {
         var promiseTimeout = setTimeout(function () {
@@ -95,8 +104,20 @@ async function createAccount(accountData: createAccountProps): Promise<createAcc
 }
 
 
-async function signInUpHandleSuccess(dataHandle: createAccountResponseType) {
-
+async function signInUpHandleSuccess(dataHandle: createAccountResponseType): Promise<singInFunctionReturnType> {
+    try {
+        var Hostname = dataHandle?.data?.cliente_host_data?.host || '';
+        var Username = dataHandle?.data?.usuario_data?.username || '';
+        var Password = dataHandle?.data?.usuario_data?.password || '';
+        var signInResult = await SignIn({
+            hostname: Hostname,
+            username: Username,
+            password: Password
+        });
+        return signInResult;
+    } catch (e: any) {
+        return { success: false, error: e.message };
+    }
 }
 
 function signUpHandleError(dataHandle: createAccountResponseType): string[] {

@@ -32,17 +32,18 @@ export type userType = {
 
 export type singInFunctionReturnType = {
     success: boolean;
+    error?: any;
     msg?: string;
-    user?: userType;
+    user?: userType | undefined;
 };
 export type signInProps = {
-    hostname:string;
-    username:string;
-    password:string;
+    hostname: string;
+    username: string;
+    password: string;
 };
 
-export async function SignIn(signInData:signInProps) {
-    var {hostname, username, password} = signInData;
+export async function SignIn(signInData: signInProps) {
+    var { hostname, username, password } = signInData;
     return new Promise<singInFunctionReturnType>((resolve) => {
         var singInPromiseTimeOut = setTimeout(() => {
             resolve({
@@ -81,7 +82,7 @@ export async function SignIn(signInData:signInProps) {
                 resolve({
                     success: false,
                     msg: 'Algum erro aconteceu',
-                    user: data
+                    error: data
                 });
             }
         });
