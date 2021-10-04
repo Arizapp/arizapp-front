@@ -1,42 +1,14 @@
 import { createContext, ReactNode, useState, useEffect } from "react";
-export type singInFunctionProps = {
-    username?: string;
-    password?: string;
-    hostname?: string;
-}
+import { userType as userTypeModel, SignIn as SignInModel, signInProps as signInPropsModel, singInFunctionReturnType as singInFunctionReturnTypeModel } from './../models/SignIn';
 
-export type userType = {
-    user_id: number;
-    username?: string;
-    password?: string;
-    hostname?: string;
-    address?: string;
-    description?: string;
-    location?: { lat: number, lng: number };
-}
 
-export type singInFunctionReturnType = {
-    success: boolean;
-    msg?: string;
-    user?: userType;
-};
-export type authUserFunctionReturnType = userType & {
+export type authUserFunctionReturnType = userTypeModel & {
     success: boolean;
     msg: string;
 }
-export type AuthUserTypeContext = {
-    user: userType | undefined;
-    setUser: (userData: userType) => void;
-    authUser: () => Promise<authUserFunctionReturnType>;
-    singIn: (data: singInFunctionProps) => Promise<void>
-};
-
-export const AuthContext = createContext({} as AuthUserTypeContext);
-
 export type AuthContextProviderProps = {
     children?: ReactNode
 };
-//TESTE 2
 export type signResponseType = {
     success?: boolean;
     error?: any;
@@ -59,9 +31,17 @@ export type signResponseType = {
     expirate_time?: number;
     redirect_url?: string;
 }
+export type AuthUserTypeContext = {
+    user: userTypeModel | undefined;
+    setUser: (userData: userTypeModel) => void;
+    authUser: () => Promise<authUserFunctionReturnType>;
+    singIn: (data: signInPropsModel) => Promise<singInFunctionReturnTypeModel | any>
+};
+export const AuthContext = createContext({} as AuthUserTypeContext);
 
 export function AuthContextProvider(props: AuthContextProviderProps) {
-    const [user, setUser] = useState<userType>();
+    const [user, setUser] = useState<userTypeModel>();
+
     async function authUser() {
         var authUserPromise = new Promise<authUserFunctionReturnType>((resolve, reject) => {
             var resolvePromiseTimeout = setTimeout(function () {
@@ -85,7 +65,7 @@ export function AuthContextProvider(props: AuthContextProviderProps) {
                     clearTimeout(resolvePromiseTimeout);
                     if (data?.success) {
                         setUser({
-                            user_id: 0,
+                            user_id: data?.id,
                             username: data?.username,
                             password: '',
                             hostname: data?.host,
@@ -123,75 +103,12 @@ export function AuthContextProvider(props: AuthContextProviderProps) {
         return await authUserPromise;
     }
 
-    async function singIn(data: singInFunctionProps) {
-
-        async function doAjaxSignIn(username: string, password: string, hostname: string, successCallBack: (data: any) => void, errorCallBack: (data: any) => void) {
-            return new Promise<singInFunctionReturnType>((resolve) => {
-                var singInPromiseTimeOut = setTimeout(() => {
-                    resolve({
-                        success: false,
-                        msg: 'Sing In Promise timeout exceded.'
-                    });
-                }, 8000);
-                Z.ajax({
-                    method: 'POST',
-                    url: 'http://localhost:8181/Login/index/sign/',
-                    with_credentials: true,
-                    headers: { "Authorization": "Credentials " + hostname + ":" + username + "@" + password, },
-                    data: { remember_me: true },
-                    success: function (data: signResponseType) {
-                        clearTimeout(singInPromiseTimeOut);
-                        var userData: userType = {
-                            user_id: (data?.data?.id || 0),
-                            username: (data?.data?.username || ''),
-                            password: '',
-                            hostname: (data?.data?.host || 'unknowserver.arizapp.com.br'),
-                            address: (data?.data?.endereco || ''),
-                            description: (data?.data?.descricao || ''),
-                            location: { lat: parseInt((data?.data?.lat_lng && data?.data?.lat_lng[0] || '0')), lng: parseInt((data?.data?.lat_lng && data?.data?.lat_lng[1] || '0')) }
-                        }
-                        resolve({
-                            success: true,
-                            msg: 'Aparentemente sucesso em entrar.',
-                            user: userData
-                        });
-                        console.log('Login response: ', data);
-                        successCallBack(data);
-                    },
-                    error: function (response) {
-                        clearTimeout(singInPromiseTimeOut);
-                        var data = (response?.responseJSON || response);
-                        console.log('Login error response: ', data);
-                        resolve({
-                            success: false,
-                            msg: 'Algum erro aconteceu',
-                            user: data
-                        });
-                        errorCallBack(data);
-                    }
-                });
-            });
+    async function singIn(data: signInPropsModel): Promise<singInFunctionReturnTypeModel> {
+        var signInResponse = await SignInModel(data);
+        if (signInResponse.success) {
+            setUser(signInResponse.user);
         }
-
-        const successAjaxSignInCallback = async function (data: any) {
-            console.log('successAjaxSignInCallback Handle: ', data);
-            setUser(data);
-            return;
-        }
-
-        const errorAjaxSignInCallback = async function (data: any) {
-            console.log('errorAjaxSignInCallback Handle: ', data);
-            return;
-        }
-
-        var singInResult = await doAjaxSignIn(
-            (data?.username || ''), (data?.password || ''),
-            (data?.hostname || ''),
-            successAjaxSignInCallback,
-            errorAjaxSignInCallback
-        );
-        console.log('Sing In Result: ', singInResult);
-        return;
+        return signInResponse;
     }
 
     return (

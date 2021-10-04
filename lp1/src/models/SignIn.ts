@@ -12,10 +12,10 @@ export type signResponseType = {
         titulo?: string;
         descricao?: string;
         endereco?: string;
-        lat_lng?: string[];
+        lat_lng?: [string, string];
         username?: string;
         chave_privada_de_acesso?: string;
-    };
+    } | undefined;
     response_time?: number;
     expirate_time?: number;
     redirect_url?: string;
