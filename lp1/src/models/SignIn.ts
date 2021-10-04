@@ -5,29 +5,29 @@ export type signResponseType = {
     code?: number;
     auth_token?: string;
     data?: {
-        auth_at?: number;
-        id?: number;
-        host?: string;
-        logo?: string;
-        titulo?: string;
-        descricao?: string;
-        endereco?: string;
-        lat_lng?: [string, string];
-        username?: string;
-        chave_privada_de_acesso?: string;
-    } | undefined;
+        auth_at: number | string | undefined;
+        id: number | string | undefined;
+        host: string | undefined;
+        logo: string | undefined;
+        titulo: string | undefined;
+        descricao: string | undefined;
+        endereco: string | undefined;
+        lat_lng: [string | number, string | number];
+        username: string | undefined;
+        chave_privada_de_acesso: string | number | undefined;
+    };
     response_time?: number;
     expirate_time?: number;
     redirect_url?: string;
 }
 export type userType = {
-    user_id: number;
-    username?: string;
+    user_id: number | string | undefined;
+    username: string | undefined;
     password?: string;
-    hostname?: string;
-    address?: string;
-    description?: string;
-    location?: { lat: number, lng: number };
+    hostname: string | undefined;
+    address: string | undefined;
+    description: string | undefined;
+    location?: { lat: number | string | undefined, lng: number | string | undefined };
 }
 
 export type singInFunctionReturnType = {
@@ -55,25 +55,25 @@ export async function SignIn(signInData: signInProps) {
             method: 'POST',
             url: 'http://localhost:8181/Login/index/sign/',
             with_credentials: true,
-            headers: { "Authorization": "Credentials " + hostname + ":" + username + "@" + password, },
+            headers: { "Authorization": "Credentials " + hostname + ":" + username + "@" + password },
             data: { remember_me: true },
-            success: function (data: signResponseType) {
+            success: function (signResponse: signResponseType) {
                 clearTimeout(singInPromiseTimeOut);
                 var userData: userType = {
-                    user_id: (data?.data?.id || 0),
-                    username: (data?.data?.username || ''),
+                    user_id: (signResponse?.data?.id || 0),
+                    username: (signResponse?.data?.username || ''),
                     password: '',
-                    hostname: (data?.data?.host || 'unknowserver.arizapp.com.br'),
-                    address: (data?.data?.endereco || ''),
-                    description: (data?.data?.descricao || ''),
-                    location: { lat: parseInt((data?.data?.lat_lng && data?.data?.lat_lng[0] || '0')), lng: parseInt((data?.data?.lat_lng && data?.data?.lat_lng[1] || '0')) }
+                    hostname: (signResponse?.data?.host || 'unknowserver.arizapp.com.br'),
+                    address: (signResponse?.data?.endereco || ''),
+                    description: (signResponse?.data?.descricao || ''),
+                    location: { lat: signResponse?.data?.lat_lng[0] || 0, lng: signResponse?.data?.lat_lng[1] }
                 }
                 resolve({
                     success: true,
                     msg: 'Aparentemente sucesso em entrar.',
                     user: userData
                 });
-                console.log('Login response: ', data);
+                console.log('SignInResponse response: ', signResponse);
             },
             error: function (response) {
                 clearTimeout(singInPromiseTimeOut);
@@ -81,7 +81,7 @@ export async function SignIn(signInData: signInProps) {
                 console.log('Login error response: ', data);
                 resolve({
                     success: false,
-                    msg: 'Algum erro aconteceu',
+                    msg: 'Unknow error when try to sign in user.',
                     error: data
                 });
             }

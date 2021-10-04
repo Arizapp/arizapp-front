@@ -2,7 +2,7 @@ export type AuthUserAjaxCallResponse = {
     success: boolean;
     error?: string | undefined | any;
     user_data?: {
-        auth_at?: number;
+        auth_at?: number | string;
         id: number;
         host: string;
         logo: string;
@@ -12,10 +12,10 @@ export type AuthUserAjaxCallResponse = {
         lat_lng: [string, string];
         username: string;
         chave_privada_de_acesso: string;
-        iat: number;
-        exp: number;
+        iat: number | string;
+        exp: number | string;
         auth_token: string;
-    } | {} | undefined;
+    };
 }
 export async function AuthUser(): Promise<AuthUserAjaxCallResponse> {
     return new Promise<AuthUserAjaxCallResponse>((resolve, reject) => {
@@ -36,10 +36,10 @@ export async function AuthUser(): Promise<AuthUserAjaxCallResponse> {
             },
             error: function (error: any) {
                 clearTimeout(resolvePromiseTimeout);
-                var data = error?.responseJSON || { success: false, msg: 'unknown user auth error' };
+                var data = error?.responseJSON || { success: false, error: 'unknown user auth error' };
                 resolve({
-                    success: data?.success,
-                    error: (error?.responseJSON || error),
+                    success: (data?.success || false),
+                    error: (data?.error || 'Unknow user auth data error.'),
                 });
             }
         });

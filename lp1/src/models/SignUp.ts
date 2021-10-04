@@ -121,9 +121,8 @@ async function signInUpHandleSuccess(dataHandle: createAccountResponseType): Pro
 }
 
 function signUpHandleError(dataHandle: createAccountResponseType): string[] {
-    /**
-     * @type {Record<string, string>}
-     */
+    var consoleLog = true;
+
     var errorsLabel = {
         'field_missing': { msg: 'O(s) campos obrigatório(s) pela requisição [' + (dataHandle?.fields_missing?.join(',') || '') + '] não foi/foram recebido(s)' },
         'required_fields_validate_error': { msg: 'Houve um erro não identificado sobre os campos obrigatórios da requisição. Por favor tente novamente.' },
@@ -148,12 +147,24 @@ function signUpHandleError(dataHandle: createAccountResponseType): string[] {
         'unknown_error': { msg: 'Houve um erro desconhecido no sistema. Por favor, tente novamente mais tarde.' }
     };
 
+    if (consoleLog) {
+        console.log('********* SignUp Error *********');
+        console.log('List of possible errors: ', errorsLabel);
+        console.log('Error data handled: ', dataHandle);
+    }
+
     var errorLabelList = (dataHandle?.error && dataHandle.error.split(';') || []);
     errorLabelList = errorLabelList.map(errorLabel => {
         var label = errorLabel as keyof typeof errorsLabel;
-        var errorMessage = (errorsLabel[label]?.msg || '-');
-        //alert(errorMessage);
+        var errorMessage = (errorsLabel[label]?.msg || 'Message for ' + label + ' not founded.');
+        if (consoleLog) {
+            console.log(label, errorMessage);
+        }
         return errorMessage;
     });
+    if (consoleLog) {
+        console.log('Errors message list return: ', errorLabelList);
+        console.log('********* SignUp Error *********');
+    }
     return errorLabelList;
 }
