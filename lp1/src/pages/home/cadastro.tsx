@@ -1,15 +1,19 @@
 import { FormEvent, useState } from 'react';
 import { Link, useHistory } from 'react-router-dom';
 import { AccountCircle, ArrowForwardIos, Lock, WhatsApp } from '@material-ui/icons';
+import './index.scss';
+
 import { ButtonDefault } from '../../components/buttons/default';
 import { ButtonPrimary } from '../../components/buttons/primary';
-import './index.scss';
 import { QueroConhecer } from './queroConhecer';
+import { signUp as SignUpModel, createAccountProps as SignUpProps } from '../../models/SignUp';
+
+import { AuthContextProviderType as AuthHookProvided } from "./../../contexts/AuthContext";
 import { useAuth } from '../../hooks/Auth';
 
 export function CadastroPage() {
     const [asideContent, setAsideContentState] = useState('default');
-    var authContexted = useAuth();
+    var { user, authUser } = useAuth();
     let userHistory = useHistory();
 
     const setAsideContentOnClick = function (content: string) {
@@ -29,15 +33,59 @@ export function CadastroPage() {
         return;
     }
 
-    function singUpFormSubmit(ev: FormEvent<HTMLFormElement>) {
+    async function singUpFormSubmit(ev: FormEvent<HTMLFormElement>): Promise<void> {
         ev.preventDefault();
         const target = ev.target as typeof ev.target & {
             whatsapp: { value: string };
             username: { value: string };
             password: { value: string };
         };
-        console.log('target: ', target);
-        return false;
+        console.log('target: ', [target.whatsapp.value, target.username.value, target.password.value]);
+        try {
+            var signUpResponse = await SignUpModel({
+                hostname: target.username.value + ".alunocleber",
+                hostserver: "sv1.arizapp.com.br",
+                username: target.username.value,
+                password: target.password.value,
+                whatsapp: target.whatsapp.value,
+                titulo: 'Nome da empresa.',
+                endereco: 'Endereço comercial de atendimento.',
+                descricao: 'Cadastro em andamento.',
+                accesskey: 'ALUNOCLEBERVBETA1'
+            });
+            if (!signUpResponse?.success) {
+                /**
+                 * @type {"create_account_failure" | "sign_in_user_error" | "unknow" | undefined | false}
+                 */
+                var errorLabel = signUpResponse?.error_label || false;
+                if (errorLabel === "create_account_failure") {
+                    (signUpResponse?.msg?.split(';') || ['Algum erro não conhecido ocorreu durante a criação da conta. Por favor, tente logar com seus dados, se não obtiver sucesso, tente criar uma nova conta.'])
+                        .map(errorMessage => {
+                            alert(errorMessage);
+                            return errorMessage;
+                        });
+                    return;
+                }
+                alert('Erro' + (' "' + errorLabel + '"' || '') + ' retornou a seguinte mensagem: ' + (signUpResponse?.msg || 'Mensagem do erro de criação de conta não foi identificada :/ Por favor. Tente novamente!'));
+                return;
+            }
+            try {
+                var userAuthData = await authUser();
+                if (!userAuthData?.success) {
+                    alert((typeof userAuthData?.error === 'string' && userAuthData?.error.length > 0 ? userAuthData?.error : 'Não foi possível autenticar o usuário. Por favor, tente novamente.'));
+                    console.log(userAuthData);
+                    return;
+                }
+                alert('Usuário autenticado com sucesso!');
+                console.log('Auth user sucess data: ', userAuthData);
+                return;
+            } catch (e: any) {
+                alert('Erro ao tentar autenticar usuário de forma automática! Por favor, faça login manualmente.');
+            }
+        } catch (e: any) {
+            alert('SignUp error: ' + e.message);
+        }
+        return;
     }
 
     return (

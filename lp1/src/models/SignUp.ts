@@ -1,4 +1,4 @@
-import { SignIn, singInFunctionReturnType, userType } from './SignIn';
+import { SignIn, singInFunctionReturnType as singInFunctionReturnTypeModel, userType } from './SignIn';
 
 export type createAccountProps = {
     hostname: string;
@@ -42,11 +42,17 @@ export type singUpFunctionReturnType = {
     success?: boolean,
     msg?: string,
     error?: any,
+    error_label?: "create_account_failure" | "sign_in_user_error" | "unknow" | undefined;
     user?: userType | undefined;
 };
-
 export async function signUp(accountData: createAccountProps): Promise<singUpFunctionReturnType> {
-    var response: singUpFunctionReturnType = { success: false, msg: 'unknown error yet.', error: undefined, user: undefined };
+    var response: singUpFunctionReturnType = {
+        success: false,
+        msg: 'unknown error yet.',
+        error: 'unknow',
+        error_label: 'unknow',
+        user: undefined
+    };
     var createAccountResponse: createAccountResponseType = { success: false, msg: '' };
     try {
         //Create account
@@ -55,25 +61,43 @@ export async function signUp(accountData: createAccountProps): Promise<singUpFun
         } catch (e) {
             throw new Error('Errro ao tentar criar conta.');
         }
-        //V
+        //Create account failure - Try to return response with errors messages identifying what's happend to UX triggers actions.
         if (!createAccountResponse?.success) {
             try {
                 var errorsMessages = signUpHandleError(createAccountResponse);
-                response.msg = errorsMessages.join(' and ');
+                response.success = false;
+                response.msg = errorsMessages.join(';');
+                response.error_label = 'create_account_failure';
+                response.error = 'Some error has occurred while creating your account.';
                 return response;
             } catch (e) {
-                throw new Error('Errro ao tentar formatar os erros internos da criação de conta.');
+                throw new Error('Error when try to format the internal errors messages for the create account action. Try to log in with yout sing up data.');
             }
         }
+        //Create account success - Try to return response with signIn user data. 
         try {
             var signInResult = await signInUpHandleSuccess(createAccountResponse);
-            return signInResult;
+            if (!signInResult?.success) {
+                response.success = false;
+                response.msg = signInResult?.msg || 'Try to sign in user returned some Unknow error reason.';
+                response.error = signInResult?.error || 'unknow';
+                response.error_label = 'sign_in_user_error';
+                response.user = undefined;
+                return response;
+            }
+            response.success = true;
+            response.msg = 'User signed in successfully!';
+            response.error = undefined;
+            response.error_label = undefined;
+            response.user = signInResult?.user;
+            return response;
         } catch (e) {
-            throw new Error('Errro ao tentar validar erros internos da criação de conta.');
+            throw new Error('Error while try to sign in user data.');
         }
-
     } catch (e: any) {
-        return { success: false, msg: e.message };
+        response.success = false;
+        response.msg = e.message;
+        return response;
     }
 }
 
@@ -95,8 +119,8 @@ async function createAccount(accountData: createAccountProps): Promise<createAcc
                 resolve(createAccountResponse);
             },
             error: function (response) {
-                var createAccountResponse = (response?.responseJSON || { success: false, error: 'unknown_error', msg: 'Erro não conhecido.' });
                 clearTimeout(promiseTimeout);
+                var createAccountResponse = (response?.responseJSON || { success: false, error: 'unknown_error', msg: 'Erro não conhecido.' });
                 resolve(createAccountResponse);
             }
         });
@@ -104,7 +128,8 @@ async function createAccount(accountData: createAccountProps): Promise<createAcc
 }
 
 
-async function signInUpHandleSuccess(dataHandle: createAccountResponseType): Promise<singInFunctionReturnType> {
+async function signInUpHandleSuccess(dataHandle: createAccountResponseType): Promise<singInFunctionReturnTypeModel> {
+    console.log('SignUp success handle data: ', dataHandle);
     try {
         var Hostname = dataHandle?.data?.cliente_host_data?.host || '';
         var Username = dataHandle?.data?.usuario_data?.username || '';
@@ -116,7 +141,7 @@ async function signInUpHandleSuccess(dataHandle: createAccountResponseType): Pro
         });
         return signInResult;
     } catch (e: any) {
-        return { success: false, error: e.message };
+        return { success: false, error: e.message, msg: 'Some error occurred while try to sign in user account.' };
     }
 }
 
