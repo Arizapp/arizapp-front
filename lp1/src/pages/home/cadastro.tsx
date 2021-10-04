@@ -91,7 +91,6 @@ export function CadastroPage() {
     return (
         <main>
             <aside>
-                {JSON.stringify(user)}
                 {(asideContent === 'queroConhecer' ? <QueroConhecer /> : <AsideDefaultContent />)}
             </aside>
             <div className="content">
