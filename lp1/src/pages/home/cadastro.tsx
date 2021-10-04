@@ -91,8 +91,8 @@ export function CadastroPage() {
     return (
         <main>
             <aside>
+                {JSON.stringify(user)}
                 {(asideContent === 'queroConhecer' ? <QueroConhecer /> : <AsideDefaultContent />)}
-                <button onClick={event => { goTo('/login') }}>Go to Login</button>
             </aside>
             <div className="content">
                 <div className="content-indicate arrow">

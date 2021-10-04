@@ -1,3 +1,5 @@
+import { getInfo as GetAuxiliarInfoModel, getInfoResponseType as GetAuxiliarInfoType } from './VerticalAuxiliarInfoApi';
+
 export type AuthUserAjaxCallResponse = {
     success: boolean;
     error?: string | undefined | any;
@@ -15,9 +17,27 @@ export type AuthUserAjaxCallResponse = {
         iat: number | string;
         exp: number | string;
         auth_token: string;
+        sing_up_status?: GetAuxiliarInfoType
     };
 }
+
 export async function AuthUser(): Promise<AuthUserAjaxCallResponse> {
+    var authUser = await GetAuthUser();
+    try {
+        if (authUser?.user_data?.id) {
+            var auxiliarInfo = await GetAuxiliarInfoModel({
+                info_key: 'user_' + (authUser.user_data?.id || 0),
+                info_label: 'sign_up_status'
+            });
+            authUser.user_data.sing_up_status = auxiliarInfo;
+        }
+    } catch (e: any) {
+        console.log(e);
+    }
+    return authUser;
+}
+
+async function GetAuthUser(): Promise<AuthUserAjaxCallResponse> {
     return new Promise<AuthUserAjaxCallResponse>((resolve, reject) => {
         var resolvePromiseTimeout = setTimeout(function () {
             resolve({

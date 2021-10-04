@@ -1,3 +1,5 @@
+import { getInfo as GetAuxiliarInfoModel, getInfoResponseType as GetAuxiliarInfoType } from './VerticalAuxiliarInfoApi';
+
 export type signResponseType = {
     success?: boolean;
     error?: any;
@@ -28,6 +30,7 @@ export type userType = {
     address: string | undefined;
     description: string | undefined;
     location?: { lat: number | string | undefined, lng: number | string | undefined };
+    sing_up_status?: GetAuxiliarInfoType;
 }
 
 export type singInFunctionReturnType = {
@@ -41,8 +44,22 @@ export type signInProps = {
     username: string;
     password: string;
 };
-
-export async function SignIn(signInData: signInProps) {
+export async function SignIn(signInData: signInProps): Promise<singInFunctionReturnType> {
+    var signInResponse = await DoSignIn(signInData);
+    try {
+        if (signInResponse?.success && signInResponse?.user) {
+            var auxiliarInfo = await GetAuxiliarInfoModel({
+                info_key: 'user_' + (signInResponse?.user?.user_id || 0),
+                info_label: 'sign_up_status'
+            });
+            signInResponse.user.sing_up_status = auxiliarInfo;
+        }
+    } catch (e: any) {
+        console.log(e);
+    }
+    return signInResponse;
+}
+export async function DoSignIn(signInData: signInProps): Promise<singInFunctionReturnType> {
     var { hostname, username, password } = signInData;
     return new Promise<singInFunctionReturnType>((resolve) => {
         var singInPromiseTimeOut = setTimeout(() => {

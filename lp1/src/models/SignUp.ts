@@ -1,5 +1,5 @@
 import { SignIn, singInFunctionReturnType as singInFunctionReturnTypeModel, userType } from './SignIn';
-
+import { createInfo as CreateAuxiliarInfoModel, getInfo as GetAuxiliarInfoModel, CreateInfoResponseType as CreateAuxiliarInfoResponseType } from './VerticalAuxiliarInfoApi';
 export type createAccountProps = {
     hostname: string;
     hostserver: string;
@@ -45,6 +45,12 @@ export type singUpFunctionReturnType = {
     error_label?: "create_account_failure" | "sign_in_user_error" | "unknow" | undefined;
     user?: userType | undefined;
 };
+
+export type createAuxiliarInfoForCreatedAccountProps = {
+    user_id: number;
+    info_value: Array<any> | Record<string, any> | string | number;
+};
+
 export async function signUp(accountData: createAccountProps): Promise<singUpFunctionReturnType> {
     var response: singUpFunctionReturnType = {
         success: false,
@@ -74,6 +80,20 @@ export async function signUp(accountData: createAccountProps): Promise<singUpFun
                 throw new Error('Error when try to format the internal errors messages for the create account action. Try to log in with yout sing up data.');
             }
         }
+
+        //Cria informação auxiliar sobre a criação da conta.
+        try {
+            var auxiliarInfoResponse = await createAuxiliarInfoForCreatedAccount({
+                user_id: (createAccountResponse.data?.cliente_host_data?.id || 0),
+                info_value: 'missing_account_data'
+            });
+            if (!auxiliarInfoResponse.success) {
+                throw new Error('Create auxiliar info for sing up account failed. ' + auxiliarInfoResponse.msg);
+            }
+        } catch (e: any) {
+            console.log(e);
+        }
+
         //Create account success - Try to return response with signIn user data. 
         try {
             var signInResult = await signInUpHandleSuccess(createAccountResponse);
@@ -101,7 +121,6 @@ export async function signUp(accountData: createAccountProps): Promise<singUpFun
     }
 }
 
-
 async function createAccount(accountData: createAccountProps): Promise<createAccountResponseType> {
     return new Promise((resolve, reject) => {
         var promiseTimeout = setTimeout(function () {
@@ -127,6 +146,18 @@ async function createAccount(accountData: createAccountProps): Promise<createAcc
     });
 }
 
+async function createAuxiliarInfoForCreatedAccount(createAuxiliarInfoForCreatedAccount: createAuxiliarInfoForCreatedAccountProps): Promise<CreateAuxiliarInfoResponseType> {
+    try {
+        var createAuxiliarInfoResponse = await CreateAuxiliarInfoModel({
+            info_label: 'sign_up_status',
+            info_key: 'user_' + createAuxiliarInfoForCreatedAccount.user_id,
+            info_value: createAuxiliarInfoForCreatedAccount.info_value
+        });
+        return createAuxiliarInfoResponse;
+    } catch (e: any) {
+        return { success: false, msg: e.message };
+    }
+}
 
 async function signInUpHandleSuccess(dataHandle: createAccountResponseType): Promise<singInFunctionReturnTypeModel> {
     console.log('SignUp success handle data: ', dataHandle);
