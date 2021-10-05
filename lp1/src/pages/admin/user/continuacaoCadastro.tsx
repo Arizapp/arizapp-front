@@ -71,10 +71,17 @@ export function ContinuacaoCadastroHeader() {
                     Arizapp
                 </div>
                 <ul>
-                    <li>
+                    <li className="dropdown-float">
                         <a href="javscript:void(0)" className="imageArea">
                             <img src={avatar || undefined} alt="avatar" title="avatar"></img>
                         </a>
+                        <ul>
+                            <li>
+                                <a href="javascript:void(0)">
+                                    Minha conta
+                                </a>
+                            </li>
+                        </ul>
                     </li>
                 </ul>
             </div>
