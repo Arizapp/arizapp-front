@@ -6,15 +6,13 @@ import './index.scss';
 import { ButtonDefault } from '../../components/buttons/default';
 import { ButtonPrimary } from '../../components/buttons/primary';
 import { QueroConhecer } from './queroConhecer';
-import { signUp as SignUpModel, createAccountProps as SignUpProps } from '../../models/SignUp';
+import { signUp as SignUpModel } from '../../models/SignUp';
 
-import { AuthContextProviderType as AuthHookProvided } from "./../../contexts/AuthContext";
 import { useAuth } from '../../hooks/Auth';
 
 export function CadastroPage() {
     const [asideContent, setAsideContentState] = useState('default');
     var { user, authUser } = useAuth();
-    let userHistory = useHistory();
 
     const setAsideContentOnClick = function (content: string) {
         setAsideContentState(content);
@@ -28,10 +26,7 @@ export function CadastroPage() {
             </>
         );
     }
-    function goTo(urlPath: string) {
-        userHistory.push(urlPath);
-        return;
-    }
+
 
     async function singUpFormSubmit(ev: FormEvent<HTMLFormElement>): Promise<void> {
         ev.preventDefault();
@@ -102,7 +97,7 @@ export function CadastroPage() {
                     <div className="formContent">
                         <form method="post" id="signUpForm" onSubmit={singUpFormSubmit}>
                             <div className="formContent-area formContent-header">
-                                <h1>Cadastrar</h1>
+                                <h1>{user ? 'Realmente deseja cadastrar outra conta ' + user.username + '?' : "Cadastrar"}</h1>
                             </div>
                             <div className="formContent-area formContent-body">
                                 <div className="input-group inline">

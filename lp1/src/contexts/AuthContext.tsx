@@ -14,12 +14,28 @@ export type AuthContextProviderType = {
 export const AuthContext = createContext({} as AuthContextProviderType);
 
 export function AuthContextProvider(props: AuthContextProviderProps) {
-    const [user, setUser] = useState<userTypeModel>();
+
+    function getUserFromLocalStorage(): userTypeModel | undefined {
+        var localUserData = localStorage.getItem('auth_user');
+        if (!localUserData) {
+            console.log('no local user founded');
+            return undefined;
+        }
+        try {
+            var localUser: userTypeModel = JSON.parse(localUserData);
+            console.log('LocalUser: ', localUser);
+            return localUser;
+        } catch (e: any) {
+            console.log(e);
+        }
+        return undefined;
+    }
+    const [user, setUser] = useState<userTypeModel | undefined>(getUserFromLocalStorage());
 
     async function authUser(): Promise<AuthUserAjaxCallResponseModel> {
         const authResponse = await AuthUserModel();
         if (authResponse.success) {
-            setUser({
+            var userData = {
                 user_id: authResponse?.user_data?.id || 0,
                 hostname: authResponse?.user_data?.host,
                 username: authResponse?.user_data?.username,
@@ -28,7 +44,11 @@ export function AuthContextProvider(props: AuthContextProviderProps) {
                 location: { lat: authResponse?.user_data?.lat_lng[0], lng: authResponse?.user_data?.lat_lng[1] },
                 description: authResponse?.user_data?.descricao,
                 sing_up_status: authResponse?.user_data?.sing_up_status
-            });
+            };
+            setUser(userData);
+            localStorage.setItem('auth_user', JSON.stringify(userData));
+        } else {
+            setUser(undefined);
         }
         return authResponse;
     }
@@ -45,7 +65,14 @@ export function AuthContextProvider(props: AuthContextProviderProps) {
         if (!user) {
             authUser();
         }
-    }, []);
+        var authInterval = setInterval(function () {
+            authUser();
+        }, 45000);
+        return () => {
+            clearInterval(authInterval);
+        }
+
+    }, [user]);
     return (
         <AuthContext.Provider value={{ user, setUser, authUser, singIn }}>
             {props.children}

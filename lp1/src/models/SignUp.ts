@@ -1,5 +1,5 @@
 import { SignIn, singInFunctionReturnType as singInFunctionReturnTypeModel, userType } from './SignIn';
-import { createInfo as CreateAuxiliarInfoModel, getInfo as GetAuxiliarInfoModel, CreateInfoResponseType as CreateAuxiliarInfoResponseType } from './VerticalAuxiliarInfoApi';
+import { createInfo as CreateAuxiliarInfoModel, CreateInfoResponseType as CreateAuxiliarInfoResponseType } from './VerticalAuxiliarInfoApi';
 export type createAccountProps = {
     hostname: string;
     hostserver: string;
@@ -209,7 +209,7 @@ function signUpHandleError(dataHandle: createAccountResponseType): string[] {
         console.log('Error data handled: ', dataHandle);
     }
 
-    var errorLabelList = (dataHandle?.error && dataHandle.error.split(';') || []);
+    var errorLabelList = (dataHandle?.error ? dataHandle.error.split(';') : []);
     errorLabelList = errorLabelList.map(errorLabel => {
         var label = errorLabel as keyof typeof errorsLabel;
         var errorMessage = (errorsLabel[label]?.msg || 'Message for ' + label + ' not founded.');
