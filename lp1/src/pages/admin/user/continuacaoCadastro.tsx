@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useAuth } from './../../../hooks/Auth';
 import { ButtonPrimary } from './../../../components/buttons/primary';
+import { FaBeer } from 'react-icons/fa';
 
 import './continuacaoCadastro.scss';
 
@@ -78,7 +79,7 @@ export function ContinuacaoCadastroHeader() {
                         <ul>
                             <li>
                                 <a href="javascript:void(0)">
-                                    Minha conta
+                                    <FaBeer /> Minha conta
                                 </a>
                             </li>
                         </ul>
